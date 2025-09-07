@@ -68,6 +68,11 @@ The Makefile reads `/proc/config.gz` (or a provided source) and, for each option
 - `00-alsa-pci-legacy-off.config`: disables legacy PCI ALSA drivers (non-HDA) such as EMU10K1, FM801, AC'97-era chipsets.
 - `00-joy-legacy-off.config`: disables legacy gameport-era joystick drivers (keeps USB-based xpad/iforce_usb, etc.).
 - `00-scsi-off.config`: disables SCSI low-level drivers (HBA-specific) while keeping SCSI core intact.
+- `00-nfc-off.config`: disables NFC core and NFC device drivers.
+- `00-staging-off.config`: disables staging drivers subtree (and staging media when present).
+- `00-9p-rxrpc-off.config`: disables 9P network filesystem and RxRPC stack (and RXKAD/RXGK auth).
+- `00-ceph-lib-off.config`: disables Ceph client library (useful only with CephFS/RBD userspace).
+- `00-intel-smartconnect-off.config`: disables deprecated Intel Smart Connect feature.
 
 These generated files complement `10-base.config`, which prioritizes a minimal, fast kernel by turning off extensive debug/tracing/testing options and choosing modern defaults like Zstd compression.
 
