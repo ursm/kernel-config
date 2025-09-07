@@ -1,6 +1,7 @@
 KCONFIG_SRC ?= /proc/config.gz
 # Auto-detect reader: use zcat for *.gz, otherwise cat (not user-overridable)
 override KCONFIG_READ := $(if $(filter %.gz,$(notdir $(KCONFIG_SRC))),zcat,cat)
+KCFG_READ_CMD := $(KCONFIG_READ) $(KCONFIG_SRC)
 GENERATED := 00-net-vendors-off.config 00-wlan-vendors-off.config 00-usbnet-off.config 00-drm-off.config 00-fs-off.config 00-part-off.config 00-media-off.config 00-scsi-off.config 00-iio-off.config 00-netfs-off.config 00-pata-off.config 00-sata-off.config 00-alsa-pci-legacy-off.config 00-joy-legacy-off.config 00-9p-rxrpc-off.config 00-ceph-lib-off.config 00-intel-smartconnect-off.config
 # A curated set of DRM device drivers to disable by default.
 # This avoids turning off DRM core helpers (KMS, TTM, helpers, etc.).
@@ -19,7 +20,7 @@ SND_PCI_LEGACY_RE := EMU10K1X?|FM801|ENS137[01]|CMIPCI|VIA82XX|ALI5451|ATIIXP|CS
 all: $(GENERATED)
 
 00-net-vendors-off.config: $(KCONFIG_SRC) FORCE
-	$(KCONFIG_READ) $(KCONFIG_SRC) \
+	$(KCFG_READ_CMD) \
 	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
 	  | grep -E '^CONFIG_NET_VENDOR_' \
 	  | sort -u \
@@ -27,7 +28,7 @@ all: $(GENERATED)
 	  > $@
 
 00-wlan-vendors-off.config: $(KCONFIG_SRC) FORCE
-	$(KCONFIG_READ) $(KCONFIG_SRC) \
+	$(KCFG_READ_CMD) \
 	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
 	  | grep -E '^CONFIG_WLAN_VENDOR_' \
 	  | sort -u \
@@ -35,7 +36,7 @@ all: $(GENERATED)
 	  > $@
 
 00-usbnet-off.config: $(KCONFIG_SRC) FORCE
-	$(KCONFIG_READ) $(KCONFIG_SRC) \
+	$(KCFG_READ_CMD) \
 	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
 	  | grep -E '^CONFIG_USB_NET_' \
 	  | sort -u \
@@ -43,7 +44,7 @@ all: $(GENERATED)
 	  > $@
 
 00-drm-off.config: $(KCONFIG_SRC) FORCE
-	$(KCONFIG_READ) $(KCONFIG_SRC) \
+	$(KCFG_READ_CMD) \
 	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
 	  | grep -E "^CONFIG_DRM_($(DRM_DRIVER_RE)|$(DRM_SMALL_RE))$$" \
 	  | sort -u \
@@ -51,7 +52,7 @@ all: $(GENERATED)
 	  > $@
 
 00-fs-off.config: $(KCONFIG_SRC) FORCE
-	$(KCONFIG_READ) $(KCONFIG_SRC) \
+	$(KCFG_READ_CMD) \
 	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
 	  | grep -E "^CONFIG_($(FS_BLOCK_RE))_FS$$" \
 	  | sort -u \
@@ -59,7 +60,7 @@ all: $(GENERATED)
 	  > $@
 
 00-media-off.config: $(KCONFIG_SRC) FORCE
-	$(KCONFIG_READ) $(KCONFIG_SRC) \
+	$(KCFG_READ_CMD) \
 	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
 	  | grep -E '^CONFIG_($(MEDIA_RE))$$' \
 	  | grep -Ev '^CONFIG_(MEDIA_SUPPORT|MEDIA_USB_SUPPORT|MEDIA_CAMERA_SUPPORT|MEDIA_CONTROLLER|VIDEO_DEV)$$' \
@@ -68,7 +69,7 @@ all: $(GENERATED)
 	  > $@
 
 00-iio-off.config: $(KCONFIG_SRC) FORCE
-	$(KCONFIG_READ) $(KCONFIG_SRC) \
+	$(KCFG_READ_CMD) \
 	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
 	  | grep -E '^CONFIG_IIO($$|_)' \
 	  | sort -u \
@@ -76,7 +77,7 @@ all: $(GENERATED)
 	  > $@
 
 00-netfs-off.config: $(KCONFIG_SRC) FORCE
-	$(KCONFIG_READ) $(KCONFIG_SRC) \
+	$(KCFG_READ_CMD) \
 	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
 	  | grep -E '^CONFIG_($(NETFS_RE))$$' \
 	  | sort -u \
@@ -84,7 +85,7 @@ all: $(GENERATED)
 	  > $@
 
 00-scsi-off.config: $(KCONFIG_SRC) FORCE
-	$(KCONFIG_READ) $(KCONFIG_SRC) \
+	$(KCFG_READ_CMD) \
 	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
 	  | grep -E '^CONFIG_SCSI_.*$$' \
 	  | grep -Ev '^CONFIG_($(SCSI_KEEP_RE))$$' \
@@ -93,7 +94,7 @@ all: $(GENERATED)
 	  > $@
 
 00-part-off.config: $(KCONFIG_SRC) FORCE
-	$(KCONFIG_READ) $(KCONFIG_SRC) \
+	$(KCFG_READ_CMD) \
 	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
 	  | grep -E '^(CONFIG_($(PART_RE))_PARTITION|CONFIG_MINIX_SUBPARTITION|CONFIG_(BSD_DISKLABEL|UNIXWARE_DISKLABEL))$$' \
 	  | sort -u \
@@ -101,7 +102,7 @@ all: $(GENERATED)
 	  > $@
 
 00-pata-off.config: $(KCONFIG_SRC) FORCE
-	$(KCONFIG_READ) $(KCONFIG_SRC) \
+	$(KCFG_READ_CMD) \
 	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
 	  | grep -E '^CONFIG_PATA_' \
 	  | sort -u \
@@ -109,7 +110,7 @@ all: $(GENERATED)
 	  > $@
 
 00-sata-off.config: $(KCONFIG_SRC) FORCE
-	$(KCONFIG_READ) $(KCONFIG_SRC) \
+	$(KCFG_READ_CMD) \
 	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
 	  | grep -E '^CONFIG_SATA_' \
 	  | sort -u \
@@ -117,7 +118,7 @@ all: $(GENERATED)
 	  > $@
 
 00-alsa-pci-legacy-off.config: $(KCONFIG_SRC) FORCE
-	$(KCONFIG_READ) $(KCONFIG_SRC) \
+	$(KCFG_READ_CMD) \
 	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
 	  | grep -E '^CONFIG_SND_($(SND_PCI_LEGACY_RE))$$' \
 	  | sort -u \
@@ -125,7 +126,7 @@ all: $(GENERATED)
 	  > $@
 
 00-joy-legacy-off.config: $(KCONFIG_SRC) FORCE
-	$(KCONFIG_READ) $(KCONFIG_SRC) \
+	$(KCFG_READ_CMD) \
 	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
 	  | grep -E '^CONFIG_JOYSTICK_($(JOY_LEGACY_RE))$$' \
 	  | sort -u \
@@ -133,7 +134,7 @@ all: $(GENERATED)
 	  > $@
 
 00-nfc-off.config: $(KCONFIG_SRC) FORCE
-	$(KCONFIG_READ) $(KCONFIG_SRC) \
+	$(KCFG_READ_CMD) \
 	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
 	  | grep -E '^CONFIG_NFC($$|_)' \
 	  | sort -u \
@@ -141,7 +142,7 @@ all: $(GENERATED)
 	  > $@
 
 00-staging-off.config: $(KCONFIG_SRC) FORCE
-	$(KCONFIG_READ) $(KCONFIG_SRC) \
+	$(KCFG_READ_CMD) \
 	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
 	  | grep -E '^CONFIG_STAGING($$|_)' \
 	  | sort -u \
@@ -149,7 +150,7 @@ all: $(GENERATED)
 	  > $@
 
 00-9p-rxrpc-off.config: $(KCONFIG_SRC) FORCE
-	$(KCONFIG_READ) $(KCONFIG_SRC) \
+	$(KCFG_READ_CMD) \
 	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
 	  | grep -E '^(CONFIG_NET_9P($$|_)|CONFIG_AF_RXRPC($$|_)|CONFIG_RX(KAD|GK)($$|_))$$' \
 	  | sort -u \
@@ -157,7 +158,7 @@ all: $(GENERATED)
 	  > $@
 
 00-ceph-lib-off.config: $(KCONFIG_SRC) FORCE
-	$(KCONFIG_READ) $(KCONFIG_SRC) \
+	$(KCFG_READ_CMD) \
 	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
 	  | grep -E '^CONFIG_CEPH_LIB($$|_)$$' \
 	  | sort -u \
@@ -165,7 +166,7 @@ all: $(GENERATED)
 	  > $@
 
 00-intel-smartconnect-off.config: $(KCONFIG_SRC) FORCE
-	$(KCONFIG_READ) $(KCONFIG_SRC) \
+	$(KCFG_READ_CMD) \
 	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
 	  | grep -E '^CONFIG_INTEL_SMARTCONNECT$$' \
 	  | sort -u \
