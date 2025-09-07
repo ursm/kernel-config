@@ -6,7 +6,7 @@ Small, reproducible collection of Linux kernel config fragments for Gentoo's dis
 
 This repository helps you maintain kernel configuration as small, focused fragments:
 
-- Generate `00-*.config` files from the running kernel (`/proc/config.gz`) that disable broad option families (NET vendor, WLAN vendor, DRM, filesystems, partitions, media, SCSI LLD, IIO, NetFS). USB NET and NFC are handled in `10-base.config`.
+- Generate `00-*.config` files from the running kernel (`/proc/config.gz`) that disable broad option families (NET vendor, WLAN vendor, DRM, filesystems, partitions, media, SCSI LLD, IIO, NetFS). USB NET, NFC, and 9P/RxRPC cores are handled in `10-base.config`.
 - Keep opinionated base settings in `10-base.config` for a lightweight kernel.
 - Keep machine/user specific overrides in `99-local.config` (with an example provided).
 - Install all `*.config` files to `/etc/kernel/config.d` in one command.
@@ -100,7 +100,7 @@ Then edit `99-local.config` to match your needs (e.g., specific GPU, WLAN vendor
 - `make help`: list available targets and fragment aliases.
 - Fragment aliases: call `make <name>` to generate `00-<name>.config`.
   Examples: `make fs-off`, `make drm-off`, `make netfs-off`.
-  Available names: `net-vendors-off`, `wlan-vendors-off`, `drm-off`, `fs-off`, `part-off`, `media-off`, `scsi-off`, `iio-off`, `netfs-off`, `pata-off`, `sata-off`, `alsa-pci-legacy-off`, `joy-legacy-off`, `9p-rxrpc-off`.
+  Available names: `net-vendors-off`, `wlan-vendors-off`, `drm-off`, `fs-off`, `part-off`, `media-off`, `scsi-off`, `iio-off`, `netfs-off`, `pata-off`, `sata-off`, `alsa-pci-legacy-off`, `joy-legacy-off`.
 
 ### Selecting the source `.config`
 
