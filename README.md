@@ -6,7 +6,7 @@ Small, reproducible collection of Linux kernel config fragments for Gentoo's dis
 
 This repository helps you maintain kernel configuration as small, focused fragments:
 
-- Generate `00-*.config` files from the running kernel (`/proc/config.gz`) that disable broad option families (NET vendor, WLAN vendor, USB NET, DRM, filesystems, partitions, media, SCSI LLD, IIO, NetFS).
+- Generate `00-*.config` files from the running kernel (`/proc/config.gz`) that disable broad option families (NET vendor, WLAN vendor, DRM, filesystems, partitions, media, SCSI LLD, IIO, NetFS). USB NET is handled in `10-base.config`.
 - Keep opinionated base settings in `10-base.config` for a lightweight kernel.
 - Keep machine/user specific overrides in `99-local.config` (with an example provided).
 - Install all `*.config` files to `/etc/kernel/config.d` in one command.
@@ -56,7 +56,7 @@ The Makefile reads `/proc/config.gz` (or a provided source) and, for each option
 
 - `00-net-vendors-off.config`: disables all `CONFIG_NET_VENDOR_*` options.
 - `00-wlan-vendors-off.config`: disables all `CONFIG_WLAN_VENDOR_*` options.
-- `00-usbnet-off.config`: disables all `CONFIG_USB_NET_*` options.
+  USB NET: disabled in `10-base.config` via top-level options.
 - `00-drm-off.config`: disables non-core DRM options while keeping DRM core helpers (KMS, TTM, GEM helpers, DP helpers, display helpers) intact. Also drops small embedded panels/displays (MIPI DBI, SSD130x, ST77xx, GM12U320, selected PANEL_*), while keeping laptop‑relevant parts.
 - `00-fs-off.config`: disables common on-disk filesystems — e.g., ext4/xfs/btrfs/f2fs/bcachefs/ntfs/exfat — without touching pseudo filesystems like proc/sysfs/tmpfs.
 - `00-part-off.config`: disables partition table parsers — e.g., GPT/EFI, MBR/MSDOS, and legacy labels (Amiga/Mac/BSD/etc.).
@@ -100,7 +100,7 @@ Then edit `99-local.config` to match your needs (e.g., specific GPU, WLAN vendor
 - `make help`: list available targets and fragment aliases.
 - Fragment aliases: call `make <name>` to generate `00-<name>.config`.
   Examples: `make fs-off`, `make drm-off`, `make netfs-off`.
-  Available names: `net-vendors-off`, `wlan-vendors-off`, `usbnet-off`, `drm-off`, `fs-off`, `part-off`, `media-off`, `scsi-off`, `iio-off`, `netfs-off`, `pata-off`, `sata-off`, `alsa-pci-legacy-off`, `joy-legacy-off`, `9p-rxrpc-off`, `nfc-off` (opt‑in), `staging-off` (opt‑in).
+  Available names: `net-vendors-off`, `wlan-vendors-off`, `drm-off`, `fs-off`, `part-off`, `media-off`, `scsi-off`, `iio-off`, `netfs-off`, `pata-off`, `sata-off`, `alsa-pci-legacy-off`, `joy-legacy-off`, `9p-rxrpc-off`, `nfc-off` (opt‑in), `staging-off` (opt‑in).
 
 ### Selecting the source `.config`
 
