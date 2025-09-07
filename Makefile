@@ -37,7 +37,6 @@ FRAG_ALIASES := \
 	alsa-pci-legacy-off \
 	joy-legacy-off \
 	9p-rxrpc-off \
-	nfc-off \
 	staging-off
 
 $(FRAG_ALIASES): %: 00-%.config
@@ -144,14 +143,6 @@ $(FRAG_ALIASES): %: 00-%.config
 	$(KCFG_READ_CMD) \
 	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
 	  | grep -E '^CONFIG_JOYSTICK_($(JOY_LEGACY_RE))$$' \
-	  | sort -u \
-	  | sed -E 's/^/# /; s/$$/ is not set/' \
-	  > $@
-
-00-nfc-off.config: $(KCONFIG_SRC) FORCE
-	$(KCFG_READ_CMD) \
-	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
-	  | grep -E '^CONFIG_NFC($$|_)' \
 	  | sort -u \
 	  | sed -E 's/^/# /; s/$$/ is not set/' \
 	  > $@
