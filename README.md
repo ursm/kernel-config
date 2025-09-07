@@ -34,6 +34,10 @@ This repository helps you maintain kernel configuration as small, focused fragme
 
   sudo make install
 
+- Uninstall all files installed by this repo (safe; uses manifest):
+
+  sudo make uninstall
+
 - Clean generated files (`00-*.config` only):
 
   make clean
@@ -78,6 +82,8 @@ Then edit `99-local.config` to match your needs (e.g., specific GPU, WLAN vendor
 - On Gentoo, files placed in `/etc/kernel/config.d` are picked up by `sys-kernel/gentoo-kernel` on the next build/upgrade, influencing the final `.config`.
 - The generated files reflect the option families present in the selected source `.config` (enabled, modular, or already disabled are all normalized). If you change kernels, re-run `make` to refresh.
 - `install` depends on `all`, so `make install` will always generate before copying.
+- `install` writes a manifest to `/etc/kernel/config.d/.kernel-config.manifest` and removes files from previous installs that no longer exist in the repo (safe cleanup; it does not touch files it did not install).
+- `uninstall` reads the manifest and removes only the files previously installed by this repository, then deletes the manifest. It leaves `/etc/kernel/config.d` intact.
 - `clean` removes only the generated `00-*.config` files, preserving your curated files.
 - `10-x86.config` is copied only when `uname -m` is `x86_64` or `i?86`.
 

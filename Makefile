@@ -136,8 +136,10 @@ clean:
 	rm -f $(GENERATED)
 
 install: all
-	mkdir -p /etc/kernel/config.d
-	sh -c 'set -e; arch=$$(uname -m); for f in *.config; do case "$$f" in 10-x86.config) case "$$arch" in x86_64|i?86) cp "$$f" /etc/kernel/config.d/ ;; esac ;; *) cp "$$f" /etc/kernel/config.d/ ;; esac; done'
+	sh scripts/install.sh
+
+uninstall:
+	sh scripts/uninstall.sh
 
 check:
 	@echo "KCONFIG_SRC: $(KCONFIG_SRC)"
@@ -157,6 +159,6 @@ check:
 	@printf "  SATA:          "; $(KCONFIG_READ) $(KCONFIG_SRC) | grep -Ec '^CONFIG_SATA_.*=(y|m)' || true
 	@printf "  JOY legacy:    "; $(KCONFIG_READ) $(KCONFIG_SRC) | grep -Ec '^CONFIG_JOYSTICK_($(JOY_LEGACY_RE))=(y|m)' || true
 
-.PHONY: all clean install check FORCE
+.PHONY: all clean install uninstall check FORCE
 
 FORCE:
