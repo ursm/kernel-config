@@ -62,7 +62,7 @@ The Makefile reads `/proc/config.gz` (or a provided source) and, for each option
 - `00-fs-off.config`: disables common on-disk filesystems — e.g., ext4/xfs/btrfs/f2fs/bcachefs/ntfs/exfat — without touching pseudo filesystems like proc/sysfs/tmpfs.
 - `00-part-off.config`: disables partition table parsers — e.g., GPT/EFI, MBR/MSDOS, and legacy labels (Amiga/Mac/BSD/etc.).
 - `00-media-off.config`: disables Media (V4L2/DVB/RC) options. Minimal webcam support (UVC) is re-enabled in `10-base.config`.
-- `00-iio-off.config`: disables Industrial I/O (IIO) core and drivers (sensors/ADC/DAC).
+- `00-iio-off.config`: disables Industrial I/O (IIO) by turning off the core option.
 - `00-netfs-off.config`: disables network filesystems — CIFS/SMB, NFS, 9P, AFS, Ceph.
 - `00-pata-off.config`: disables legacy Parallel ATA (PATA) support and related host drivers.
 - `00-sata-off.config`: disables all `CONFIG_SATA_*` host/controller drivers; AHCI is re-enabled in `10-base.config`.

@@ -64,7 +64,7 @@ all: prune $(GENERATED)
 00-iio-off.config: $(KCONFIG_SRC) FORCE
 	$(KCFG_READ_CMD) \
 	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
-	  | grep -E '^CONFIG_IIO($$|_)' \
+	  | grep -E '^CONFIG_IIO$$' \
 	  | sort -u \
 	  | sed -E 's/^/# /; s/$$/ is not set/' \
 	  > $@
