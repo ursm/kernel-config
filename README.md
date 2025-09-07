@@ -92,7 +92,8 @@ Then edit `99-local.config` to match your needs (e.g., specific GPU, WLAN vendor
 - `install` depends on `all`, so `make install` will always generate before copying.
 - `install` writes a manifest to `/etc/kernel/config.d/.kernel-config.manifest` and removes files from previous installs that no longer exist in the repo (safe cleanup; it does not touch files it did not install).
 - `uninstall` reads the manifest and removes only the files previously installed by this repository, then deletes the manifest. It leaves `/etc/kernel/config.d` intact.
-- `clean` removes only the generated `00-*.config` files, preserving your curated files.
+- `prune` removes orphaned `00-*.config` files in the repo root that no longer have generators.
+- `clean` removes all `00-*.config` files.
 - `10-x86.config` is copied only when `uname -m` is `x86_64` or `i?86`.
 
 ### Convenience Targets
@@ -101,6 +102,7 @@ Then edit `99-local.config` to match your needs (e.g., specific GPU, WLAN vendor
 - Fragment aliases: call `make <name>` to generate `00-<name>.config`.
   Examples: `make fs-off`, `make drm-off`, `make netfs-off`.
   Available names: `net-vendors-off`, `wlan-vendors-off`, `drm-off`, `fs-off`, `part-off`, `media-off`, `scsi-off`, `iio-off`, `netfs-off`, `pata-off`, `sata-off`, `alsa-pci-legacy-off`, `joy-legacy-off`.
+  Note: `make all` runs `prune` automatically before generation.
 
 ### Selecting the source `.config`
 

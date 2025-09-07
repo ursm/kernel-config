@@ -17,7 +17,7 @@ NETFS_RE := NFS_FS|CIFS|SMB_SERVER|9P_FS|AFS_FS|CEPH_FS
 JOY_LEGACY_RE := ANALOG|A3D|ADI|COBRA|GF2K|GRIP(_MP)?|GUILLEMOT|INTERACT|SIDEWINDER|TMDC|WARRIOR|MAGELLAN|SPACEORB|SPACEBALL|STINGER|TWIDJOY|ZHENHUA|JOYDUMP|IFORCE_232
 SND_PCI_LEGACY_RE := EMU10K1X?|FM801|ENS137[01]|CMIPCI|VIA82XX|ALI5451|ATIIXP|CS4281|CS46XX|TRIDENT|AU88[123]0|ICE17(12|24)|INTEL8X0M?
 
-all: $(GENERATED)
+all: prune $(GENERATED)
 
 ## Convenience aliases
 # Generate any fragment by its base name (without leading 00- and .config)
@@ -147,7 +147,17 @@ $(FRAG_ALIASES): %: 00-%.config
 	  > $@
 
 clean:
-	rm -f $(GENERATED)
+	rm -f 00-*.config
+
+prune:
+	sh -eu -c '\
+	  tmp=$$(mktemp); \
+	  printf "%s\n" $(GENERATED) > "$$tmp"; \
+	  for f in 00-*.config; do \
+	    [ -e "$$f" ] || continue; \
+	    if ! grep -Fxq "$$f" "$$tmp"; then rm -f "$$f"; fi; \
+	  done; \
+	  rm -f "$$tmp"'
 
 install: all
 	sh scripts/install.sh
@@ -162,7 +172,8 @@ help:
 	@echo "  all             Generate default 00-*.config set"
 	@echo "  install         Install *.config to /etc/kernel/config.d (with cleanup)"
 	@echo "  uninstall       Remove files previously installed by this repo"
-	@echo "  clean           Remove generated 00-*.config"
+	@echo "  prune           Remove orphaned 00-*.config in repo root"
+	@echo "  clean           Remove all 00-*.config"
 	@echo "  check           Show source and counts"
 	@echo
 	@echo "Fragment aliases (generate 00-<name>.config):"
@@ -186,6 +197,6 @@ check:
 	@printf "  SATA:          "; $(KCONFIG_READ) $(KCONFIG_SRC) | grep -Ec '^CONFIG_SATA_.*=(y|m)' || true
 	@printf "  JOY legacy:    "; $(KCONFIG_READ) $(KCONFIG_SRC) | grep -Ec '^CONFIG_JOYSTICK_($(JOY_LEGACY_RE))=(y|m)' || true
 
-.PHONY: all clean install uninstall check help $(FRAG_ALIASES) FORCE
+.PHONY: all clean prune install uninstall check help $(FRAG_ALIASES) FORCE
 
 FORCE:
