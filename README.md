@@ -70,7 +70,7 @@ The Makefile reads `/proc/config.gz` (or a provided source) and, for each option
 - `00-scsi-off.config`: disables SCSI low-level drivers (HBA-specific) while keeping SCSI core intact.
 - `00-9p-rxrpc-off.config`: disables 9P network filesystem and RxRPC stack (and RXKAD/RXGK auth).
 - `00-ceph-lib-off.config`: disables Ceph client library (useful only with CephFS/RBD userspace).
-- `00-intel-smartconnect-off.config`: disables deprecated Intel Smart Connect feature.
+  Intel Smart Connect is disabled in `10-base.config`.
 
 ### Optional Fragments (Opt-in)
 

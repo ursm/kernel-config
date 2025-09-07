@@ -2,7 +2,7 @@ KCONFIG_SRC ?= /proc/config.gz
 # Auto-detect reader: use zcat for *.gz, otherwise cat (not user-overridable)
 override KCONFIG_READ := $(if $(filter %.gz,$(notdir $(KCONFIG_SRC))),zcat,cat)
 KCFG_READ_CMD := $(KCONFIG_READ) $(KCONFIG_SRC)
-GENERATED := 00-net-vendors-off.config 00-wlan-vendors-off.config 00-usbnet-off.config 00-drm-off.config 00-fs-off.config 00-part-off.config 00-media-off.config 00-scsi-off.config 00-iio-off.config 00-netfs-off.config 00-pata-off.config 00-sata-off.config 00-alsa-pci-legacy-off.config 00-joy-legacy-off.config 00-9p-rxrpc-off.config 00-ceph-lib-off.config 00-intel-smartconnect-off.config
+GENERATED := 00-net-vendors-off.config 00-wlan-vendors-off.config 00-usbnet-off.config 00-drm-off.config 00-fs-off.config 00-part-off.config 00-media-off.config 00-scsi-off.config 00-iio-off.config 00-netfs-off.config 00-pata-off.config 00-sata-off.config 00-alsa-pci-legacy-off.config 00-joy-legacy-off.config 00-9p-rxrpc-off.config 00-ceph-lib-off.config
 # A curated set of DRM device drivers to disable by default.
 # This avoids turning off DRM core helpers (KMS, TTM, helpers, etc.).
 # Major desktop/virtual GPU drivers and common vendor stacks are included.
@@ -161,14 +161,6 @@ all: $(GENERATED)
 	$(KCFG_READ_CMD) \
 	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
 	  | grep -E '^CONFIG_CEPH_LIB($$|_)$$' \
-	  | sort -u \
-	  | sed -E 's/^/# /; s/$$/ is not set/' \
-	  > $@
-
-00-intel-smartconnect-off.config: $(KCONFIG_SRC) FORCE
-	$(KCFG_READ_CMD) \
-	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
-	  | grep -E '^CONFIG_INTEL_SMARTCONNECT$$' \
 	  | sort -u \
 	  | sed -E 's/^/# /; s/$$/ is not set/' \
 	  > $@
