@@ -9,69 +9,92 @@ DRM_DRIVER_RE := AMDGPU|RADEON|I915|XE|NOUVEAU|VMWGFX|GMA500|UDL|AST|MGAG200|QXL
 FS_BLOCK_RE := EXT[234]|XFS|BTRFS|F2FS|NILFS2|REISERFS|JFS|HFSPLUS|HFS|MINIX|UFS|BFS|BEFS|EROFS|EXFAT|NTFS3|FAT|MSDOS|VFAT|ISO9660|UDF|OCFS2|GFS2|BCACHEFS
 PART_RE := EFI|MSDOS|AMIGA|OSF|SGI|SUN|MAC|ATARI|IBM|LDM|KARMA|ULTRIX|SYSV68|MINIX_SUB|SOLARIS_X86
 MEDIA_RE := MEDIA_.*|VIDEO_.*|V4L2_.*|DVB_.*|RC_.*|IR_.*
-SCSI_KEEP_RE := SCSI$|SCSI_COMMON|SCSI_PROC_FS|SCSI_SCAN_.*|SCSI_LOWLEVEL|SCSI_LOGGING|SCSI_CONSTANTS|SCSI_NETLINK|SCSI_DMA|SCSI_.*ATTRS|SCSI_.*TRANSPORT
+SCSI_KEEP_RE := SCSI$$|SCSI_COMMON|SCSI_PROC_FS|SCSI_SCAN_.*|SCSI_LOWLEVEL|SCSI_LOGGING|SCSI_CONSTANTS|SCSI_NETLINK|SCSI_DMA|SCSI_.*ATTRS|SCSI_.*TRANSPORT
 NETFS_RE := NFS_FS|CIFS|SMB_SERVER|9P_FS|AFS_FS|CEPH_FS
 
 all: $(GENERATED)
 
 00-net-vendors-off.config: $(KCONFIG_SRC) FORCE
 	$(KCONFIG_READ) $(KCONFIG_SRC) \
-	  | awk -F= '/^CONFIG_NET_VENDOR_/ {print "# "$$1" is not set"}' \
-	  | sort -u > $@
+	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
+	  | grep -E '^CONFIG_NET_VENDOR_' \
+	  | sort -u \
+	  | sed -E 's/^/# /; s/$$/ is not set/' \
+	  > $@
 
 00-wlan-vendors-off.config: $(KCONFIG_SRC) FORCE
 	$(KCONFIG_READ) $(KCONFIG_SRC) \
-	  | awk -F= '/^CONFIG_WLAN_VENDOR_/ {print "# "$$1" is not set"}' \
-	  | sort -u > $@
+	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
+	  | grep -E '^CONFIG_WLAN_VENDOR_' \
+	  | sort -u \
+	  | sed -E 's/^/# /; s/$$/ is not set/' \
+	  > $@
 
 00-usbnet-off.config: $(KCONFIG_SRC) FORCE
 	$(KCONFIG_READ) $(KCONFIG_SRC) \
-	  | awk -F= '/^CONFIG_USB_NET_/ {print "# "$$1" is not set"}' \
-	  | sort -u > $@
+	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
+	  | grep -E '^CONFIG_USB_NET_' \
+	  | sort -u \
+	  | sed -E 's/^/# /; s/$$/ is not set/' \
+	  > $@
 
 00-drm-off.config: $(KCONFIG_SRC) FORCE
 	$(KCONFIG_READ) $(KCONFIG_SRC) \
-	  | grep -E "^CONFIG_DRM_($(DRM_DRIVER_RE))=(y|m)" \
-	  | awk -F= '{print "# "$$1" is not set"}' \
-	  | sort -u > $@
+	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
+	  | grep -E "^CONFIG_DRM_($(DRM_DRIVER_RE))$$" \
+	  | sort -u \
+	  | sed -E 's/^/# /; s/$$/ is not set/' \
+	  > $@
 
 00-fs-off.config: $(KCONFIG_SRC) FORCE
 	$(KCONFIG_READ) $(KCONFIG_SRC) \
-	  | grep -E "^CONFIG_($(FS_BLOCK_RE))_FS=(y|m)" \
-	  | awk -F= '{print "# "$$1" is not set"}' \
-	  | sort -u > $@
+	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
+	  | grep -E "^CONFIG_($(FS_BLOCK_RE))_FS$$" \
+	  | sort -u \
+	  | sed -E 's/^/# /; s/$$/ is not set/' \
+	  > $@
 
 00-media-off.config: $(KCONFIG_SRC) FORCE
 	$(KCONFIG_READ) $(KCONFIG_SRC) \
-	  | grep -E '^CONFIG_($(MEDIA_RE))=(y|m)' \
-	  | grep -Ev '^CONFIG_(MEDIA_SUPPORT|MEDIA_USB_SUPPORT|MEDIA_CAMERA_SUPPORT|MEDIA_CONTROLLER|VIDEO_DEV)=' \
-	  | awk -F= '{print "# "$$1" is not set"}' \
-	  | sort -u > $@
+	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
+	  | grep -E '^CONFIG_($(MEDIA_RE))$$' \
+	  | grep -Ev '^CONFIG_(MEDIA_SUPPORT|MEDIA_USB_SUPPORT|MEDIA_CAMERA_SUPPORT|MEDIA_CONTROLLER|VIDEO_DEV)$$' \
+	  | sort -u \
+	  | sed -E 's/^/# /; s/$$/ is not set/' \
+	  > $@
 
 00-iio-off.config: $(KCONFIG_SRC) FORCE
 	$(KCONFIG_READ) $(KCONFIG_SRC) \
-	  | grep -E '^CONFIG_IIO(=|_).*=(y|m)' \
-	  | awk -F= '{print "# "$$1" is not set"}' \
-	  | sort -u > $@
+	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
+	  | grep -E '^CONFIG_IIO($$|_)' \
+	  | sort -u \
+	  | sed -E 's/^/# /; s/$$/ is not set/' \
+	  > $@
 
 00-netfs-off.config: $(KCONFIG_SRC) FORCE
 	$(KCONFIG_READ) $(KCONFIG_SRC) \
-	  | grep -E '^CONFIG_($(NETFS_RE))=(y|m)' \
-	  | awk -F= '{print "# "$$1" is not set"}' \
-	  | sort -u > $@
+	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
+	  | grep -E '^CONFIG_($(NETFS_RE))$$' \
+	  | sort -u \
+	  | sed -E 's/^/# /; s/$$/ is not set/' \
+	  > $@
 
 00-scsi-off.config: $(KCONFIG_SRC) FORCE
 	$(KCONFIG_READ) $(KCONFIG_SRC) \
-	  | grep -E '^CONFIG_SCSI_.*=(y|m)' \
-	  | grep -Ev '^CONFIG_($(SCSI_KEEP_RE))=' \
-	  | awk -F= '{print "# "$$1" is not set"}' \
-	  | sort -u > $@
+	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
+	  | grep -E '^CONFIG_SCSI_.*$$' \
+	  | grep -Ev '^CONFIG_($(SCSI_KEEP_RE))$$' \
+	  | sort -u \
+	  | sed -E 's/^/# /; s/$$/ is not set/' \
+	  > $@
 
 00-part-off.config: $(KCONFIG_SRC) FORCE
 	$(KCONFIG_READ) $(KCONFIG_SRC) \
-	  | grep -E '^(CONFIG_($(PART_RE))_PARTITION|CONFIG_(BSD_DISKLABEL|UNIXWARE_DISKLABEL))=(y|m)' \
-	  | awk -F= '{print "# "$$1" is not set"}' \
-	  | sort -u > $@
+	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
+	  | grep -E '^(CONFIG_($(PART_RE))_PARTITION|CONFIG_(BSD_DISKLABEL|UNIXWARE_DISKLABEL))$$' \
+	  | sort -u \
+	  | sed -E 's/^/# /; s/$$/ is not set/' \
+	  > $@
 
 clean:
 	rm -f $(GENERATED)
