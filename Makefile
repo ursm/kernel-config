@@ -1,7 +1,7 @@
 KCONFIG_SRC ?= /proc/config.gz
 # Auto-detect reader: use zcat for *.gz, otherwise cat (not user-overridable)
 override KCONFIG_READ := $(if $(filter %.gz,$(notdir $(KCONFIG_SRC))),zcat,cat)
-GENERATED := 00-net-vendors-off.config 00-wlan-vendors-off.config 00-usbnet-off.config 00-drm-off.config 00-fs-off.config 00-part-off.config 00-media-off.config 00-scsi-off.config 00-iio-off.config
+GENERATED := 00-net-vendors-off.config 00-wlan-vendors-off.config 00-usbnet-off.config 00-drm-off.config 00-fs-off.config 00-part-off.config 00-media-off.config 00-scsi-off.config 00-iio-off.config 00-netfs-off.config
 # A curated set of DRM device drivers to disable by default.
 # This avoids turning off DRM core helpers (KMS, TTM, helpers, etc.).
 # Major desktop/virtual GPU drivers and common vendor stacks are included.
@@ -10,6 +10,7 @@ FS_BLOCK_RE := EXT[234]|XFS|BTRFS|F2FS|NILFS2|REISERFS|JFS|HFSPLUS|HFS|MINIX|UFS
 PART_RE := EFI|MSDOS|AMIGA|OSF|SGI|SUN|MAC|ATARI|IBM|LDM|KARMA|ULTRIX|SYSV68|MINIX_SUB|SOLARIS_X86
 MEDIA_RE := MEDIA_.*|VIDEO_.*|V4L2_.*|DVB_.*|RC_.*|IR_.*
 SCSI_KEEP_RE := SCSI$|SCSI_COMMON|SCSI_PROC_FS|SCSI_SCAN_.*|SCSI_LOWLEVEL|SCSI_LOGGING|SCSI_CONSTANTS|SCSI_NETLINK|SCSI_DMA|SCSI_.*ATTRS|SCSI_.*TRANSPORT
+NETFS_RE := NFS_FS|CIFS|SMB_SERVER|9P_FS|AFS_FS|CEPH_FS
 
 all: $(GENERATED)
 
@@ -53,6 +54,12 @@ all: $(GENERATED)
 	  | awk -F= '{print "# "$$1" is not set"}' \
 	  | sort -u > $@
 
+00-netfs-off.config: $(KCONFIG_SRC) FORCE
+	$(KCONFIG_READ) $(KCONFIG_SRC) \
+	  | grep -E '^CONFIG_($(NETFS_RE))=(y|m)' \
+	  | awk -F= '{print "# "$$1" is not set"}' \
+	  | sort -u > $@
+
 00-scsi-off.config: $(KCONFIG_SRC) FORCE
 	$(KCONFIG_READ) $(KCONFIG_SRC) \
 	  | grep -E '^CONFIG_SCSI_.*=(y|m)' \
@@ -85,6 +92,7 @@ check:
 	@printf "  Partitions:    "; $(KCONFIG_READ) $(KCONFIG_SRC) | grep -Ec '^(CONFIG_($(PART_RE))_PARTITION|CONFIG_(BSD_DISKLABEL|UNIXWARE_DISKLABEL))=(y|m)' || true
 	@printf "  Media:         "; $(KCONFIG_READ) $(KCONFIG_SRC) | grep -Ec '^CONFIG_($(MEDIA_RE))=(y|m)' || true
 	@printf "  IIO:           "; $(KCONFIG_READ) $(KCONFIG_SRC) | grep -Ec '^CONFIG_IIO(=|_).*=(y|m)' || true
+	@printf "  NetFS:         "; $(KCONFIG_READ) $(KCONFIG_SRC) | grep -Ec '^CONFIG_($(NETFS_RE))=(y|m)' || true
 	@printf "  SCSI LLD:      "; $(KCONFIG_READ) $(KCONFIG_SRC) | grep -E '^CONFIG_SCSI_.*=(y|m)' | grep -Ev '^CONFIG_($(SCSI_KEEP_RE))=' | wc -l
 
 .PHONY: all clean install check FORCE
