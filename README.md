@@ -60,6 +60,7 @@ The Makefile reads `/proc/config.gz` (or a provided source) and, for each option
 - `00-iio-off.config`: disables Industrial I/O (IIO) core and drivers (sensors/ADC/DAC).
 - `00-netfs-off.config`: disables network filesystems — CIFS/SMB, NFS, 9P, AFS, Ceph.
 - `00-pata-off.config`: disables legacy Parallel ATA (PATA) support and related host drivers.
+- `00-sata-off.config`: disables all `CONFIG_SATA_*` host/controller drivers; AHCI is re-enabled in `10-base.config`.
 - `00-scsi-off.config`: disables SCSI low-level drivers (HBA-specific) while keeping SCSI core intact.
 
 These generated files complement `10-base.config`, which prioritizes a minimal, fast kernel by turning off extensive debug/tracing/testing options and choosing modern defaults like Zstd compression.

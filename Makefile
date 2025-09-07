@@ -1,7 +1,7 @@
 KCONFIG_SRC ?= /proc/config.gz
 # Auto-detect reader: use zcat for *.gz, otherwise cat (not user-overridable)
 override KCONFIG_READ := $(if $(filter %.gz,$(notdir $(KCONFIG_SRC))),zcat,cat)
-GENERATED := 00-net-vendors-off.config 00-wlan-vendors-off.config 00-usbnet-off.config 00-drm-off.config 00-fs-off.config 00-part-off.config 00-media-off.config 00-scsi-off.config 00-iio-off.config 00-netfs-off.config 00-pata-off.config
+GENERATED := 00-net-vendors-off.config 00-wlan-vendors-off.config 00-usbnet-off.config 00-drm-off.config 00-fs-off.config 00-part-off.config 00-media-off.config 00-scsi-off.config 00-iio-off.config 00-netfs-off.config 00-pata-off.config 00-sata-off.config
 # A curated set of DRM device drivers to disable by default.
 # This avoids turning off DRM core helpers (KMS, TTM, helpers, etc.).
 # Major desktop/virtual GPU drivers and common vendor stacks are included.
@@ -105,6 +105,14 @@ all: $(GENERATED)
 	  | sed -E 's/^/# /; s/$$/ is not set/' \
 	  > $@
 
+00-sata-off.config: $(KCONFIG_SRC) FORCE
+	$(KCONFIG_READ) $(KCONFIG_SRC) \
+	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
+	  | grep -E '^CONFIG_SATA_' \
+	  | sort -u \
+	  | sed -E 's/^/# /; s/$$/ is not set/' \
+	  > $@
+
 clean:
 	rm -f $(GENERATED)
 
@@ -127,6 +135,7 @@ check:
 	@printf "  NetFS:         "; $(KCONFIG_READ) $(KCONFIG_SRC) | grep -Ec '^CONFIG_($(NETFS_RE))=(y|m)' || true
 	@printf "  SCSI LLD:      "; $(KCONFIG_READ) $(KCONFIG_SRC) | grep -E '^CONFIG_SCSI_.*=(y|m)' | grep -Ev '^CONFIG_($(SCSI_KEEP_RE))=' | wc -l
 	@printf "  PATA:          "; $(KCONFIG_READ) $(KCONFIG_SRC) | grep -Ec '^CONFIG_PATA_.*=(y|m)' || true
+	@printf "  SATA:          "; $(KCONFIG_READ) $(KCONFIG_SRC) | grep -Ec '^CONFIG_SATA_.*=(y|m)' || true
 
 .PHONY: all clean install check FORCE
 
