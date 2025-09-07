@@ -48,17 +48,17 @@ This repository helps you maintain kernel configuration as small, focused fragme
 
 ## How It Works
 
-The Makefile reads `/proc/config.gz` and produces the following files by matching option families and emitting "is not set" lines, sorted and unique:
+The Makefile reads `/proc/config.gz` (or a provided source) and, for each option family, normalizes entries whether enabled, modular, or already disabled, and emits canonical "# CONFIG_… is not set" lines (sorted and unique):
 
 - `00-net-vendors-off.config`: disables all `CONFIG_NET_VENDOR_*` options.
 - `00-wlan-vendors-off.config`: disables all `CONFIG_WLAN_VENDOR_*` options.
 - `00-usbnet-off.config`: disables all `CONFIG_USB_NET_*` options.
-- `00-drm-off.config`: disables non-core DRM options detected as enabled (y/m) while keeping DRM core helpers (KMS, TTM, GEM helpers, DP helpers, display helpers) intact.
-- `00-fs-off.config`: disables common on-disk filesystems detected as enabled (y/m) — e.g., ext4/xfs/btrfs/f2fs/bcachefs/ntfs/exfat — without touching pseudo filesystems like proc/sysfs/tmpfs.
-- `00-part-off.config`: disables partition table parsers detected as enabled (y/m) — e.g., GPT/EFI, MBR/MSDOS, and legacy labels (Amiga/Mac/BSD/etc.).
-- `00-media-off.config`: disables Media (V4L2/DVB/RC) options detected as enabled (y/m). Minimal webcam support (UVC) is re-enabled in `10-base.config`.
-- `00-iio-off.config`: disables Industrial I/O (IIO) core and drivers (sensors/ADC/DAC), if enabled.
-- `00-netfs-off.config`: disables network filesystems detected as enabled (y/m) — CIFS/SMB, NFS, 9P, AFS, Ceph.
+- `00-drm-off.config`: disables non-core DRM options while keeping DRM core helpers (KMS, TTM, GEM helpers, DP helpers, display helpers) intact.
+- `00-fs-off.config`: disables common on-disk filesystems — e.g., ext4/xfs/btrfs/f2fs/bcachefs/ntfs/exfat — without touching pseudo filesystems like proc/sysfs/tmpfs.
+- `00-part-off.config`: disables partition table parsers — e.g., GPT/EFI, MBR/MSDOS, and legacy labels (Amiga/Mac/BSD/etc.).
+- `00-media-off.config`: disables Media (V4L2/DVB/RC) options. Minimal webcam support (UVC) is re-enabled in `10-base.config`.
+- `00-iio-off.config`: disables Industrial I/O (IIO) core and drivers (sensors/ADC/DAC).
+- `00-netfs-off.config`: disables network filesystems — CIFS/SMB, NFS, 9P, AFS, Ceph.
 - `00-scsi-off.config`: disables SCSI low-level drivers (HBA-specific) while keeping SCSI core intact.
 
 These generated files complement `10-base.config`, which prioritizes a minimal, fast kernel by turning off extensive debug/tracing/testing options and choosing modern defaults like Zstd compression.
@@ -72,7 +72,7 @@ Then edit `99-local.config` to match your needs (e.g., specific GPU, WLAN vendor
 ## Notes
 
 - On Gentoo, files placed in `/etc/kernel/config.d` are picked up by `sys-kernel/gentoo-kernel` on the next build/upgrade, influencing the final `.config`.
-- The generated files reflect the option families present in the currently running kernel. If you change kernels, re-run `make` to refresh.
+- The generated files reflect the option families present in the selected source `.config` (enabled, modular, or already disabled are all normalized). If you change kernels, re-run `make` to refresh.
 - `install` depends on `all`, so `make install` will always generate before copying.
 - `clean` removes only the generated `00-*.config` files, preserving your curated files.
 - `10-x86.config` is copied only when `uname -m` is `x86_64` or `i?86`.
