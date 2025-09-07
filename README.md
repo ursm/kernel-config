@@ -75,7 +75,7 @@ The Makefile reads `/proc/config.gz` (or a provided source) and, for each option
 
 ### Optional Fragments (Opt-in)
 
-- `00-staging-off.config`: disables staging drivers subtree. Not included in the default `make all`.
+Currently none.
 
 These generated files complement `10-base.config`, which prioritizes a minimal, fast kernel by turning off extensive debug/tracing/testing options and choosing modern defaults like Zstd compression.
 
@@ -100,7 +100,7 @@ Then edit `99-local.config` to match your needs (e.g., specific GPU, WLAN vendor
 - `make help`: list available targets and fragment aliases.
 - Fragment aliases: call `make <name>` to generate `00-<name>.config`.
   Examples: `make fs-off`, `make drm-off`, `make netfs-off`.
-  Available names: `net-vendors-off`, `wlan-vendors-off`, `drm-off`, `fs-off`, `part-off`, `media-off`, `scsi-off`, `iio-off`, `netfs-off`, `pata-off`, `sata-off`, `alsa-pci-legacy-off`, `joy-legacy-off`, `9p-rxrpc-off`, `staging-off` (opt‑in).
+  Available names: `net-vendors-off`, `wlan-vendors-off`, `drm-off`, `fs-off`, `part-off`, `media-off`, `scsi-off`, `iio-off`, `netfs-off`, `pata-off`, `sata-off`, `alsa-pci-legacy-off`, `joy-legacy-off`, `9p-rxrpc-off`.
 
 ### Selecting the source `.config`
 
