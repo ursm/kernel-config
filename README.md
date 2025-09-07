@@ -6,7 +6,7 @@ Small, reproducible collection of Linux kernel config fragments for Gentoo's dis
 
 This repository helps you maintain kernel configuration as small, focused fragments:
 
-- Generate `00-*.config` files from the running kernel (`/proc/config.gz`) that disable broad option families (NET vendor, WLAN vendor, USB NET, DRM).
+- Generate `00-*.config` files from the running kernel (`/proc/config.gz`) that disable broad option families (NET vendor, WLAN vendor, USB NET, DRM, filesystems).
 - Keep opinionated base settings in `10-base.config` for a lightweight kernel.
 - Keep machine/user specific overrides in `99-local.config` (with an example provided).
 - Install all `*.config` files to `/etc/kernel/config.d` in one command.
@@ -54,6 +54,7 @@ The Makefile reads `/proc/config.gz` and produces the following files by matchin
 - `00-wlan-vendors-off.config`: disables all `CONFIG_WLAN_VENDOR_*` options.
 - `00-usbnet-off.config`: disables all `CONFIG_USB_NET_*` options.
 - `00-drm-off.config`: disables non-core DRM options detected as enabled (y/m) while keeping DRM core helpers (KMS, TTM, GEM helpers, DP helpers, display helpers) intact.
+- `00-fs-off.config`: disables common on-disk filesystems detected as enabled (y/m) — e.g., ext4/xfs/btrfs/f2fs/bcachefs/ntfs/exfat — without touching pseudo filesystems like proc/sysfs/tmpfs.
 
 These generated files complement `10-base.config`, which prioritizes a minimal, fast kernel by turning off extensive debug/tracing/testing options and choosing modern defaults like Zstd compression.
 
