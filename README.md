@@ -6,7 +6,7 @@ Small, reproducible collection of Linux kernel config fragments for Gentoo's dis
 
 This repository helps you maintain kernel configuration as small, focused fragments:
 
-- Generate `00-*.config` files from the running kernel (`/proc/config.gz`) that disable broad option families (NET vendor, WLAN vendor, USB NET, DRM, filesystems).
+- Generate `00-*.config` files from the running kernel (`/proc/config.gz`) that disable broad option families (NET vendor, WLAN vendor, USB NET, DRM, filesystems, partitions, media, SCSI LLD, IIO, NetFS).
 - Keep opinionated base settings in `10-base.config` for a lightweight kernel.
 - Keep machine/user specific overrides in `99-local.config` (with an example provided).
 - Install all `*.config` files to `/etc/kernel/config.d` in one command.
@@ -59,6 +59,7 @@ The Makefile reads `/proc/config.gz` and produces the following files by matchin
 - `00-media-off.config`: disables Media (V4L2/DVB/RC) options detected as enabled (y/m). Minimal webcam support (UVC) is re-enabled in `10-base.config`.
 - `00-iio-off.config`: disables Industrial I/O (IIO) core and drivers (sensors/ADC/DAC), if enabled.
 - `00-netfs-off.config`: disables network filesystems detected as enabled (y/m) — CIFS/SMB, NFS, 9P, AFS, Ceph.
+- `00-scsi-off.config`: disables SCSI low-level drivers (HBA-specific) while keeping SCSI core intact.
 
 These generated files complement `10-base.config`, which prioritizes a minimal, fast kernel by turning off extensive debug/tracing/testing options and choosing modern defaults like Zstd compression.
 
