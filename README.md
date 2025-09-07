@@ -95,6 +95,13 @@ Then edit `99-local.config` to match your needs (e.g., specific GPU, WLAN vendor
 - `clean` removes only the generated `00-*.config` files, preserving your curated files.
 - `10-x86.config` is copied only when `uname -m` is `x86_64` or `i?86`.
 
+### Convenience Targets
+
+- `make help`: list available targets and fragment aliases.
+- Fragment aliases: call `make <name>` to generate `00-<name>.config`.
+  Examples: `make fs-off`, `make drm-off`, `make netfs-off`.
+  Available names: `net-vendors-off`, `wlan-vendors-off`, `usbnet-off`, `drm-off`, `fs-off`, `part-off`, `media-off`, `scsi-off`, `iio-off`, `netfs-off`, `pata-off`, `sata-off`, `alsa-pci-legacy-off`, `joy-legacy-off`, `9p-rxrpc-off`, `ceph-lib-off`, `nfc-off` (opt‑in), `staging-off` (opt‑in).
+
 ### Selecting the source `.config`
 
 - Default source: `/proc/config.gz`.

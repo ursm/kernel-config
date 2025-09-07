@@ -19,6 +19,31 @@ SND_PCI_LEGACY_RE := EMU10K1X?|FM801|ENS137[01]|CMIPCI|VIA82XX|ALI5451|ATIIXP|CS
 
 all: $(GENERATED)
 
+## Convenience aliases
+# Generate any fragment by its base name (without leading 00- and .config)
+# Example: `make fs-off` -> builds 00-fs-off.config
+FRAG_ALIASES := \
+	net-vendors-off \
+	wlan-vendors-off \
+	usbnet-off \
+	drm-off \
+	fs-off \
+	part-off \
+	media-off \
+	scsi-off \
+	iio-off \
+	netfs-off \
+	pata-off \
+	sata-off \
+	alsa-pci-legacy-off \
+	joy-legacy-off \
+	9p-rxrpc-off \
+	ceph-lib-off \
+	nfc-off \
+	staging-off
+
+$(FRAG_ALIASES): %: 00-%.config
+
 00-net-vendors-off.config: $(KCONFIG_SRC) FORCE
 	$(KCFG_READ_CMD) \
 	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
@@ -174,6 +199,19 @@ install: all
 uninstall:
 	sh scripts/uninstall.sh
 
+help:
+	@echo "Usage: make <target> [KCONFIG_SRC=…]"
+	@echo
+	@echo "Common targets:"
+	@echo "  all             Generate default 00-*.config set"
+	@echo "  install         Install *.config to /etc/kernel/config.d (with cleanup)"
+	@echo "  uninstall       Remove files previously installed by this repo"
+	@echo "  clean           Remove generated 00-*.config"
+	@echo "  check           Show source and counts"
+	@echo
+	@echo "Fragment aliases (generate 00-<name>.config):"
+	@printf "  %s\n" $(FRAG_ALIASES)
+
 check:
 	@echo "KCONFIG_SRC: $(KCONFIG_SRC)"
 	@if [ -r "$(KCONFIG_SRC)" ]; then echo "Readable: yes"; else echo "Readable: no"; exit 1; fi
@@ -192,6 +230,6 @@ check:
 	@printf "  SATA:          "; $(KCONFIG_READ) $(KCONFIG_SRC) | grep -Ec '^CONFIG_SATA_.*=(y|m)' || true
 	@printf "  JOY legacy:    "; $(KCONFIG_READ) $(KCONFIG_SRC) | grep -Ec '^CONFIG_JOYSTICK_($(JOY_LEGACY_RE))=(y|m)' || true
 
-.PHONY: all clean install uninstall check FORCE
+.PHONY: all clean install uninstall check help $(FRAG_ALIASES) FORCE
 
 FORCE:
