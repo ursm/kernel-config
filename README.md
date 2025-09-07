@@ -69,9 +69,7 @@ The Makefile reads `/proc/config.gz` (or a provided source) and, for each option
 - `00-alsa-pci-legacy-off.config`: disables legacy PCI ALSA drivers (non-HDA) such as EMU10K1, FM801, AC'97-era chipsets.
 - `00-joy-legacy-off.config`: disables legacy gameport-era joystick drivers (keeps USB-based xpad/iforce_usb, etc.).
 - `00-scsi-off.config`: disables SCSI low-level drivers (HBA-specific) while keeping SCSI core intact.
-- `00-9p-rxrpc-off.config`: disables 9P network filesystem and RxRPC stack (and RXKAD/RXGK auth).
-- `00-ceph-lib-off.config`: disables Ceph client library (useful only with CephFS/RBD userspace).
-  Intel Smart Connect is disabled in `10-base.config`.
+- Intel Smart Connect, USB NET, NFC, 9P/RxRPC, and Ceph lib are disabled in `10-base.config`.
 
 ### Optional Fragments (Opt-in)
 
@@ -96,13 +94,9 @@ Then edit `99-local.config` to match your needs (e.g., specific GPU, WLAN vendor
 - `clean` removes all `00-*.config` files.
 - `10-x86.config` is copied only when `uname -m` is `x86_64` or `i?86`.
 
-### Convenience Targets
+### Helper
 
-- `make help`: list available targets and fragment aliases.
-- Fragment aliases: call `make <name>` to generate `00-<name>.config`.
-  Examples: `make fs-off`, `make drm-off`, `make netfs-off`.
-  Available names: `net-vendors-off`, `wlan-vendors-off`, `drm-off`, `fs-off`, `part-off`, `media-off`, `scsi-off`, `iio-off`, `netfs-off`, `pata-off`, `sata-off`, `alsa-pci-legacy-off`, `joy-legacy-off`.
-  Note: `make all` runs `prune` automatically before generation.
+- `make help`: list available targets. `make all` runs `prune` automatically before generation.
 
 ### Selecting the source `.config`
 

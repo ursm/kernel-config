@@ -19,26 +19,7 @@ SND_PCI_LEGACY_RE := EMU10K1X?|FM801|ENS137[01]|CMIPCI|VIA82XX|ALI5451|ATIIXP|CS
 
 all: prune $(GENERATED)
 
-## Convenience aliases
-# Generate any fragment by its base name (without leading 00- and .config)
-# Example: `make fs-off` -> builds 00-fs-off.config
-FRAG_ALIASES := \
-	net-vendors-off \
-	wlan-vendors-off \
-	drm-off \
-	fs-off \
-	part-off \
-	media-off \
-	scsi-off \
-	iio-off \
-	netfs-off \
-	pata-off \
-	sata-off \
-	alsa-pci-legacy-off \
-	joy-legacy-off \
-
-
-$(FRAG_ALIASES): %: 00-%.config
+## Convenience aliases (removed; fragments are built via explicit targets)
 
 00-net-vendors-off.config: $(KCONFIG_SRC) FORCE
 	$(KCFG_READ_CMD) \
@@ -176,8 +157,9 @@ help:
 	@echo "  clean           Remove all 00-*.config"
 	@echo "  check           Show source and counts"
 	@echo
-	@echo "Fragment aliases (generate 00-<name>.config):"
-	@printf "  %s\n" $(FRAG_ALIASES)
+	@echo "Fragments: build by explicit target, e.g.:"
+	@echo "  make 00-fs-off.config   make 00-media-off.config"
+	@echo "  make 00-netfs-off.config (or use 'all' for the full set)"
 
 check:
 	@echo "KCONFIG_SRC: $(KCONFIG_SRC)"
@@ -197,6 +179,6 @@ check:
 	@printf "  SATA:          "; $(KCONFIG_READ) $(KCONFIG_SRC) | grep -Ec '^CONFIG_SATA_.*=(y|m)' || true
 	@printf "  JOY legacy:    "; $(KCONFIG_READ) $(KCONFIG_SRC) | grep -Ec '^CONFIG_JOYSTICK_($(JOY_LEGACY_RE))=(y|m)' || true
 
-.PHONY: all clean prune install uninstall check help $(FRAG_ALIASES) FORCE
+.PHONY: all clean prune install uninstall check help FORCE
 
 FORCE:
