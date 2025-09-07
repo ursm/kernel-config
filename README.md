@@ -53,7 +53,7 @@ The Makefile reads `/proc/config.gz` (or a provided source) and, for each option
 - `00-net-vendors-off.config`: disables all `CONFIG_NET_VENDOR_*` options.
 - `00-wlan-vendors-off.config`: disables all `CONFIG_WLAN_VENDOR_*` options.
 - `00-usbnet-off.config`: disables all `CONFIG_USB_NET_*` options.
-- `00-drm-off.config`: disables non-core DRM options while keeping DRM core helpers (KMS, TTM, GEM helpers, DP helpers, display helpers) intact.
+- `00-drm-off.config`: disables non-core DRM options while keeping DRM core helpers (KMS, TTM, GEM helpers, DP helpers, display helpers) intact. Also drops small embedded panels/displays (MIPI DBI, SSD130x, ST77xx, GM12U320, selected PANEL_*), while keeping laptop‑relevant parts.
 - `00-fs-off.config`: disables common on-disk filesystems — e.g., ext4/xfs/btrfs/f2fs/bcachefs/ntfs/exfat — without touching pseudo filesystems like proc/sysfs/tmpfs.
 - `00-part-off.config`: disables partition table parsers — e.g., GPT/EFI, MBR/MSDOS, and legacy labels (Amiga/Mac/BSD/etc.).
 - `00-media-off.config`: disables Media (V4L2/DVB/RC) options. Minimal webcam support (UVC) is re-enabled in `10-base.config`.

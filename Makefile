@@ -6,6 +6,8 @@ GENERATED := 00-net-vendors-off.config 00-wlan-vendors-off.config 00-usbnet-off.
 # This avoids turning off DRM core helpers (KMS, TTM, helpers, etc.).
 # Major desktop/virtual GPU drivers and common vendor stacks are included.
 DRM_DRIVER_RE := AMDGPU|RADEON|I915|XE|NOUVEAU|VMWGFX|GMA500|UDL|AST|MGAG200|QXL|VIRTIO_GPU|BOCHS|CIRRUS_QEMU|VKMS|VGEM|GUD|HYPERV|VBOXVIDEO|XEN_FRONTEND
+# Small/embedded panels and tiny displays to disable (keep laptop-relevant bits)
+DRM_SMALL_RE := MIPI_DBI|GM12U320|ST7571_I2C|ST7586|ST7735R|SSD130X|SSD130X_I2C|SSD130X_SPI|PANEL_MIPI_DBI|PANEL_WIDECHIPS_WS2401
 FS_BLOCK_RE := EXT[234]|XFS|BTRFS|F2FS|NILFS2|REISERFS|JFS|HFSPLUS|HFS|MINIX|UFS|BFS|BEFS|EROFS|EXFAT|NTFS3|FAT|MSDOS|VFAT|ISO9660|UDF|OCFS2|GFS2|BCACHEFS|AFFS|ECRYPT|JFFS2|UBIFS|ROMFS|ORANGEFS
 PART_RE := EFI|MSDOS|AMIGA|OSF|SGI|SUN|MAC|ATARI|AIX|LDM|KARMA|ULTRIX|SYSV68|SOLARIS_X86
 MEDIA_RE := MEDIA_.*|VIDEO_.*|V4L2_.*|DVB_.*|RC_.*|IR_.*
@@ -42,7 +44,7 @@ all: $(GENERATED)
 00-drm-off.config: $(KCONFIG_SRC) FORCE
 	$(KCONFIG_READ) $(KCONFIG_SRC) \
 	  | sed -E 's/^# (CONFIG_[A-Za-z0-9_]+) is not set$$/\1/; s/^(CONFIG_[A-Za-z0-9_]+)=.*/\1/' \
-	  | grep -E "^CONFIG_DRM_($(DRM_DRIVER_RE))$$" \
+	  | grep -E "^CONFIG_DRM_($(DRM_DRIVER_RE)|$(DRM_SMALL_RE))$$" \
 	  | sort -u \
 	  | sed -E 's/^/# /; s/$$/ is not set/' \
 	  > $@
