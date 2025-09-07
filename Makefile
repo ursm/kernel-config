@@ -19,7 +19,6 @@ SND_PCI_LEGACY_RE := EMU10K1X?|FM801|ENS137[01]|CMIPCI|VIA82XX|ALI5451|ATIIXP|CS
 
 all: prune $(GENERATED)
 
-## Convenience aliases (removed; fragments are built via explicit targets)
 
 00-net-vendors-off.config: $(KCONFIG_SRC) FORCE
 	$(KCFG_READ_CMD) \
