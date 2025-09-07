@@ -156,15 +156,29 @@ help:
 check:
 	@echo "KCONFIG_SRC: $(KCONFIG_SRC)"
 	@if [ -r "$(KCONFIG_SRC)" ]; then echo "Readable: yes"; else echo "Readable: no"; exit 1; fi
-	@echo "Matches (enabled=y/m):"
+	@echo "Base-handled (off via 10-base):"
+	@printf "  USB_NET_DRIVERS:  "; \
+	  sh -c 'if $(KCONFIG_READ) $(KCONFIG_SRC) | grep -q "^CONFIG_USB_NET_DRIVERS=\\(y\\|m\\)"; then echo on; elif $(KCONFIG_READ) $(KCONFIG_SRC) | grep -q "^# CONFIG_USB_NET_DRIVERS is not set"; then echo off; else echo absent; fi'
+	@printf "  NFC:              "; \
+	  sh -c 'if $(KCONFIG_READ) $(KCONFIG_SRC) | grep -q "^CONFIG_NFC=\\(y\\|m\\)"; then echo on; elif $(KCONFIG_READ) $(KCONFIG_SRC) | grep -q "^# CONFIG_NFC is not set"; then echo off; else echo absent; fi'
+	@printf "  IIO:              "; \
+	  sh -c 'if $(KCONFIG_READ) $(KCONFIG_SRC) | grep -q "^CONFIG_IIO=\\(y\\|m\\)"; then echo on; elif $(KCONFIG_READ) $(KCONFIG_SRC) | grep -q "^# CONFIG_IIO is not set"; then echo off; else echo absent; fi'
+	@printf "  AF_RXRPC:         "; \
+	  sh -c 'if $(KCONFIG_READ) $(KCONFIG_SRC) | grep -q "^CONFIG_AF_RXRPC=\\(y\\|m\\)"; then echo on; elif $(KCONFIG_READ) $(KCONFIG_SRC) | grep -q "^# CONFIG_AF_RXRPC is not set"; then echo off; else echo absent; fi'
+	@printf "  NET_9P:           "; \
+	  sh -c 'if $(KCONFIG_READ) $(KCONFIG_SRC) | grep -q "^CONFIG_NET_9P=\\(y\\|m\\)"; then echo on; elif $(KCONFIG_READ) $(KCONFIG_SRC) | grep -q "^# CONFIG_NET_9P is not set"; then echo off; else echo absent; fi'
+	@printf "  CEPH_LIB:         "; \
+	  sh -c 'if $(KCONFIG_READ) $(KCONFIG_SRC) | grep -q "^CONFIG_CEPH_LIB=\\(y\\|m\\)"; then echo on; elif $(KCONFIG_READ) $(KCONFIG_SRC) | grep -q "^# CONFIG_CEPH_LIB is not set"; then echo off; else echo absent; fi'
+	@printf "  INTEL_SMARTCONNECT: "; \
+	  sh -c 'if $(KCONFIG_READ) $(KCONFIG_SRC) | grep -q "^CONFIG_INTEL_SMARTCONNECT=\\(y\\|m\\)"; then echo on; elif $(KCONFIG_READ) $(KCONFIG_SRC) | grep -q "^# CONFIG_INTEL_SMARTCONNECT is not set"; then echo off; else echo absent; fi'
+	@echo ""
+	@echo "Generated fragments (enabled=y/m counts):"
 	@printf "  NET_VENDOR:    "; $(KCONFIG_READ) $(KCONFIG_SRC) | awk -F= '/^CONFIG_NET_VENDOR_/ && $$2 ~ /^(y|m)/ {c++} END {print c+0}'
 	@printf "  WLAN_VENDOR:   "; $(KCONFIG_READ) $(KCONFIG_SRC) | awk -F= '/^CONFIG_WLAN_VENDOR_/ && $$2 ~ /^(y|m)/ {c++} END {print c+0}'
-	@printf "  USB_NET:       "; $(KCONFIG_READ) $(KCONFIG_SRC) | awk -F= '/^CONFIG_USB_NET_/ && $$2 ~ /^(y|m)/ {c++} END {print c+0}'
 	@printf "  DRM drivers:   "; $(KCONFIG_READ) $(KCONFIG_SRC) | grep -Ec '^CONFIG_DRM_($(DRM_DRIVER_RE))=(y|m)' || true
 	@printf "  Filesystems:   "; $(KCONFIG_READ) $(KCONFIG_SRC) | grep -Ec "^CONFIG_($(FS_BLOCK_RE))_FS=(y|m)" || true
 	@printf "  Partitions:    "; $(KCONFIG_READ) $(KCONFIG_SRC) | grep -Ec '^(CONFIG_($(PART_RE))_PARTITION|CONFIG_(BSD_DISKLABEL|UNIXWARE_DISKLABEL))=(y|m)' || true
 	@printf "  Media:         "; $(KCONFIG_READ) $(KCONFIG_SRC) | grep -Ec '^CONFIG_($(MEDIA_RE))=(y|m)' || true
-	@printf "  IIO:           "; $(KCONFIG_READ) $(KCONFIG_SRC) | grep -Ec '^CONFIG_IIO=(y|m)|^CONFIG_IIO_.*=(y|m)' || true
 	@printf "  NetFS:         "; $(KCONFIG_READ) $(KCONFIG_SRC) | grep -Ec '^CONFIG_($(NETFS_RE))=(y|m)' || true
 	@printf "  SCSI LLD:      "; $(KCONFIG_READ) $(KCONFIG_SRC) | grep -E '^CONFIG_SCSI_.*=(y|m)' | grep -Ev '^CONFIG_($(SCSI_KEEP_RE))=' | wc -l
 	@printf "  PATA:          "; $(KCONFIG_READ) $(KCONFIG_SRC) | grep -Ec '^CONFIG_PATA_.*=(y|m)' || true
