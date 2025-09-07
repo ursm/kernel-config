@@ -57,6 +57,7 @@ The Makefile reads `/proc/config.gz` and produces the following files by matchin
 - `00-fs-off.config`: disables common on-disk filesystems detected as enabled (y/m) — e.g., ext4/xfs/btrfs/f2fs/bcachefs/ntfs/exfat — without touching pseudo filesystems like proc/sysfs/tmpfs.
 - `00-part-off.config`: disables partition table parsers detected as enabled (y/m) — e.g., GPT/EFI, MBR/MSDOS, and legacy labels (Amiga/Mac/BSD/etc.).
 - `00-media-off.config`: disables Media (V4L2/DVB/RC) options detected as enabled (y/m). Minimal webcam support (UVC) is re-enabled in `10-base.config`.
+- `00-iio-off.config`: disables Industrial I/O (IIO) core and drivers (sensors/ADC/DAC), if enabled.
 
 These generated files complement `10-base.config`, which prioritizes a minimal, fast kernel by turning off extensive debug/tracing/testing options and choosing modern defaults like Zstd compression.
 

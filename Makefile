@@ -1,7 +1,7 @@
 KCONFIG_SRC ?= /proc/config.gz
 # Auto-detect reader: use zcat for *.gz, otherwise cat (not user-overridable)
 override KCONFIG_READ := $(if $(filter %.gz,$(notdir $(KCONFIG_SRC))),zcat,cat)
-GENERATED := 00-net-vendors-off.config 00-wlan-vendors-off.config 00-usbnet-off.config 00-drm-off.config 00-fs-off.config 00-part-off.config 00-media-off.config 00-scsi-off.config
+GENERATED := 00-net-vendors-off.config 00-wlan-vendors-off.config 00-usbnet-off.config 00-drm-off.config 00-fs-off.config 00-part-off.config 00-media-off.config 00-scsi-off.config 00-iio-off.config
 # A curated set of DRM device drivers to disable by default.
 # This avoids turning off DRM core helpers (KMS, TTM, helpers, etc.).
 # Major desktop/virtual GPU drivers and common vendor stacks are included.
@@ -47,6 +47,12 @@ all: $(GENERATED)
 	  | awk -F= '{print "# "$$1" is not set"}' \
 	  | sort -u > $@
 
+00-iio-off.config: $(KCONFIG_SRC) FORCE
+	$(KCONFIG_READ) $(KCONFIG_SRC) \
+	  | grep -E '^CONFIG_IIO(=|_).*=(y|m)' \
+	  | awk -F= '{print "# "$$1" is not set"}' \
+	  | sort -u > $@
+
 00-scsi-off.config: $(KCONFIG_SRC) FORCE
 	$(KCONFIG_READ) $(KCONFIG_SRC) \
 	  | grep -E '^CONFIG_SCSI_.*=(y|m)' \
@@ -78,6 +84,7 @@ check:
 	@printf "  Filesystems:   "; $(KCONFIG_READ) $(KCONFIG_SRC) | grep -Ec "^CONFIG_($(FS_BLOCK_RE))_FS=(y|m)" || true
 	@printf "  Partitions:    "; $(KCONFIG_READ) $(KCONFIG_SRC) | grep -Ec '^(CONFIG_($(PART_RE))_PARTITION|CONFIG_(BSD_DISKLABEL|UNIXWARE_DISKLABEL))=(y|m)' || true
 	@printf "  Media:         "; $(KCONFIG_READ) $(KCONFIG_SRC) | grep -Ec '^CONFIG_($(MEDIA_RE))=(y|m)' || true
+	@printf "  IIO:           "; $(KCONFIG_READ) $(KCONFIG_SRC) | grep -Ec '^CONFIG_IIO(=|_).*=(y|m)' || true
 	@printf "  SCSI LLD:      "; $(KCONFIG_READ) $(KCONFIG_SRC) | grep -E '^CONFIG_SCSI_.*=(y|m)' | grep -Ev '^CONFIG_($(SCSI_KEEP_RE))=' | wc -l
 
 .PHONY: all clean install check FORCE
