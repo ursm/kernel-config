@@ -11,7 +11,7 @@ This repository targets Gentoo distribution kernels (`sys-kernel/gentoo-kernel`)
 
 ## Layout
 
-- `overlays/10-disable-devdebug.config`: Disable developer-only instrumentation and heavy debug/testing/profiling features (sanitizers, gcov/kcov, debug/test toggles, DAMON).
+- `overlays/10-disable-devdebug.config`: Disable developer-only instrumentation and heavy debug/testing/profiling features (sanitizers, gcov/kcov, debug/test toggles).
 - `overlays/20-perf-optimizations.config`: Opinionated but safe optimizations (Zstd kernel/modules, tickless idle, native CPU, perf-over-size).
 - `bin/install`: Install fragments into `/etc/kernel/config.d` (requires root).
 - `bin/uninstall`: Remove installed fragments from `/etc/kernel/config.d`.
@@ -41,7 +41,6 @@ In scope: disable developer-time instrumentation with significant runtime overhe
 
 - Sanitizers/instrumentation: KASAN, KCSAN, UBSAN, KFENCE, KCOV, GCOV (and KMSAN/KMEMLEAK when available)
 - Debug/testing/profiling: SLUB_DEBUG, PAGE_POISONING/OWNER/EXTENSION, SCHEDSTATS/LATENCYTOP, DEBUG_LIST, KGDB/KUNIT, RCU_TRACE, KALLSYMS_ALL, PROFILING, and related DEBUG_* toggles
-- Memory monitoring: DAMON
 - Prefer performance over size: `CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE=y`
 - Faster compression where applicable: `CONFIG_KERNEL_ZSTD=y`, `CONFIG_MODULE_COMPRESS=y`, `CONFIG_MODULE_COMPRESS_ZSTD=y`
 - Tickless idle: `CONFIG_NO_HZ_IDLE=y`
