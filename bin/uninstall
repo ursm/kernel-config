@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DEST_DIR=${DEST_DIR:-/etc/kernel/config.d}
+PREFIX=${PREFIX:-50-ursm-}
+
+usage() {
+  cat <<EOF
+Usage: sudo bin/uninstall [-d DEST_DIR] [-p PREFIX]
+
+Remove previously installed ursm-kernel fragments from /etc/kernel/config.d.
+
+Options:
+  -d  Destination directory (default: /etc/kernel/config.d)
+  -p  Filename prefix to match (default: 50-ursm-)
+EOF
+}
+
+while getopts ":d:p:h" opt; do
+  case "$opt" in
+    d) DEST_DIR=$OPTARG ;;
+    p) PREFIX=$OPTARG ;;
+    h) usage; exit 0 ;;
+    :) echo "Option -$OPTARG requires an argument" >&2; usage; exit 2 ;;
+    \?) echo "Unknown option -$OPTARG" >&2; usage; exit 2 ;;
+  esac
+done
+
+if [[ $EUID -ne 0 ]]; then
+  echo "This script must run as root (try: sudo bin/uninstall)" >&2
+  exit 1
+fi
+
+shopt -s nullglob
+targets=("$DEST_DIR/${PREFIX}"*.config)
+if [[ ${#targets[@]} -eq 0 ]]; then
+  echo "No matching fragments found under: $DEST_DIR with prefix: $PREFIX" >&2
+  exit 0
+fi
+
+for f in "${targets[@]}"; do
+  echo "Removing: $f"
+  rm -f -- "$f"
+done
+
+echo "Done. Removed fragments from: $DEST_DIR"
+

@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DEST_DIR=${DEST_DIR:-/etc/kernel/config.d}
+PREFIX=${PREFIX:-50-ursm-}
+
+usage() {
+  cat <<EOF
+Usage: sudo bin/install [-d DEST_DIR] [-p PREFIX]
+
+Install overlay fragments into /etc/kernel/config.d for Gentoo distribution kernels.
+
+Options:
+  -d  Destination directory (default: /etc/kernel/config.d)
+  -p  Filename prefix to avoid collisions (default: 50-ursm-)
+EOF
+}
+
+while getopts ":d:p:h" opt; do
+  case "$opt" in
+    d) DEST_DIR=$OPTARG ;;
+    p) PREFIX=$OPTARG ;;
+    h) usage; exit 0 ;;
+    :) echo "Option -$OPTARG requires an argument" >&2; usage; exit 2 ;;
+    \?) echo "Unknown option -$OPTARG" >&2; usage; exit 2 ;;
+  esac
+done
+
+if [[ $EUID -ne 0 ]]; then
+  echo "This script must run as root (try: sudo bin/install)" >&2
+  exit 1
+fi
+
+shopt -s nullglob
+overlays=(overlays/*.config)
+if [[ ${#overlays[@]} -eq 0 ]]; then
+  echo "No overlays found under overlays/*.config" >&2
+  exit 1
+fi
+
+mkdir -p "$DEST_DIR"
+
+for src in "${overlays[@]}"; do
+  base=$(basename "$src")
+  dest="$DEST_DIR/${PREFIX}${base}"
+  echo "Installing: $src -> $dest"
+  install -D -m 0644 "$src" "$dest"
+done
+
+echo "Done. Fragments installed under: $DEST_DIR"
+

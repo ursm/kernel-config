@@ -1,113 +1,62 @@
-# kernel-config
+# ursm-kernel
 
-Small, reproducible collection of Linux kernel config fragments for Gentoo's distribution kernel (`sys-kernel/gentoo-kernel`). It generates minimal defaults and installs them under Gentoo's fragment directory `/etc/kernel/config.d`.
+Personal config fragments for the Linux kernel on Gentoo distribution kernels. The scope is intentionally narrow:
 
-## Overview
+- Remove developer-only features that impact runtime performance.
+- Apply configuration changes that improve performance without side effects.
 
-This repository helps you maintain kernel configuration as small, focused fragments:
+Reducing build time is not a goal (it may happen as a byproduct). This repository avoids touching areas that can affect bootability or security; it does not modify Secure Boot, module signing, or lockdown.
 
-- Generate `00-*.config` files from the running kernel (`/proc/config.gz`) that disable broad option families (NET vendor, WLAN vendor, DRM, filesystems, partitions, media, SCSI LLD, NetFS). USB NET, NFC, IIO, and 9P/RxRPC cores are handled in `10-base.config`.
-- Keep opinionated base settings in `10-base.config` for a lightweight kernel.
-- Keep machine/user specific overrides in `99-local.config` (with an example provided).
-- Install all `*.config` files to `/etc/kernel/config.d` in one command.
+This repository targets Gentoo distribution kernels (`sys-kernel/gentoo-kernel`). Instead of editing `/usr/src/linux/.config`, fragments are placed under `/etc/kernel/config.d` and merged by the kernel packaging process.
 
-## Requirements
+## Layout
 
-- Gentoo with `sys-kernel/gentoo-kernel` (uses `/etc/kernel/config.d/*.config`).
+- `overlays/10-disable-devdebug.config`: Disable developer-only instrumentation and heavy debug/testing/profiling features (sanitizers, gcov/kcov, debug/test toggles, DAMON).
+- `overlays/20-perf-optimizations.config`: Opinionated but safe optimizations (Zstd kernel/modules, tickless idle, native CPU, perf-over-size).
+- `bin/install`: Install fragments into `/etc/kernel/config.d` (requires root).
+- `bin/uninstall`: Remove installed fragments from `/etc/kernel/config.d`.
 
-## Repository Layout
+## Install (Gentoo distribution kernel)
 
-- `Makefile`: build rules for generating, cleaning, and installing the fragments.
-- `10-base.config`: opinionated baseline focused on a lean kernel (debug/tracing/test features off; Zstd compression, etc.).
-- `10-x86.config`: x86-specific tuning (e.g., `CONFIG_X86_NATIVE_CPU=y`). Installed only on x86 hosts.
-- `00-*.config`: generated files that turn off large groups of options detected from the running kernel.
-- `99-local.config`: local overrides; kept out of VCS design by default (see example).
-- `99-local.config.example`: template to create your own `99-local.config`.
+Prerequisites:
 
-## Usage
+- Using `sys-kernel/gentoo-kernel` or another distribution kernel that honors `/etc/kernel/config.d/*.config` via `merge_config.sh`.
+- Root privileges to write to `/etc/kernel/config.d`.
 
-- Generate fragments (writes `00-*.config` to repo root):
+Steps:
 
-  make
+1. Review overlays: `overlays/10-disable-devdebug.config`, `overlays/20-perf-optimizations.config`.
+2. Install fragments: `sudo bin/install`.
+3. Rebuild or upgrade the distribution kernel as usual (e.g., `emerge -1 sys-kernel/gentoo-kernel`).
+4. If needed, revert: `sudo bin/uninstall` and rebuild.
 
-- Install all `*.config` to `/etc/kernel/config.d` (runs generation first):
+Notes:
 
-  sudo make install
+- Files are installed under `/etc/kernel/config.d` with a `50-ursm-*.config` prefix to keep ordering predictable and avoid clobbering other fragments.
+- This repository deliberately avoids functional changes that could impact boot or security posture.
 
-- Uninstall all files installed by this repo (safe; uses manifest):
+## Policy
 
-  sudo make uninstall
+In scope: disable developer-time instrumentation with significant runtime overhead, and enable safe, broadly beneficial performance features.
 
-- Clean generated files (`00-*.config` only):
+- Sanitizers/instrumentation: KASAN, KCSAN, UBSAN, KFENCE, KCOV, GCOV (and KMSAN/KMEMLEAK when available)
+- Debug/testing/profiling: SLUB_DEBUG, PAGE_POISONING/OWNER/EXTENSION, SCHEDSTATS/LATENCYTOP, DEBUG_LIST, KGDB/KUNIT, RCU_TRACE, KALLSYMS_ALL, PROFILING, and related DEBUG_* toggles
+- Memory monitoring: DAMON
+- Prefer performance over size: `CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE=y`
+- Faster compression where applicable: `CONFIG_KERNEL_ZSTD=y`, `CONFIG_MODULE_COMPRESS=y`, `CONFIG_MODULE_COMPRESS_ZSTD=y`
+- Tickless idle: `CONFIG_NO_HZ_IDLE=y`
+- Per‑machine x86 tuning: `CONFIG_X86_NATIVE_CPU=y` (note: image becomes machine‑specific)
 
-  make clean
+Out of scope: features with higher risk of side effects.
 
-- Generate a single file (example):
+- Secure Boot, module signing, lockdown
+- cgroups, BPF, tracing (e.g., ftrace)
+- Preemption model, scheduler policy, HZ, broad MM policy shifts
 
-  make 00-net-vendors-off.config
+## Troubleshooting
 
-- Check source and match counts:
-
-  make check
-
-## How It Works
-
-The Makefile reads `/proc/config.gz` (or a provided source) and, for each option family, normalizes entries whether enabled, modular, or already disabled, and emits canonical "# CONFIG_… is not set" lines (sorted and unique):
-
-- `00-net-vendors-off.config`: disables all `CONFIG_NET_VENDOR_*` options.
-- `00-wlan-vendors-off.config`: disables all `CONFIG_WLAN_VENDOR_*` options.
-  USB NET: disabled in `10-base.config` via top-level options.
-  NFC: disabled in `10-base.config` via top-level option.
-- `00-drm-off.config`: disables non-core DRM options while keeping DRM core helpers (KMS, TTM, GEM helpers, DP helpers, display helpers) intact. Also drops small embedded panels/displays (MIPI DBI, SSD130x, ST77xx, GM12U320, selected PANEL_*), while keeping laptop‑relevant parts.
-- `00-fs-off.config`: disables common on-disk filesystems — e.g., ext4/xfs/btrfs/f2fs/bcachefs/ntfs/exfat — without touching pseudo filesystems like proc/sysfs/tmpfs.
-- `00-part-off.config`: disables partition table parsers — e.g., GPT/EFI, MBR/MSDOS, and legacy labels (Amiga/Mac/BSD/etc.).
-- `00-media-off.config`: disables Media (V4L2/DVB/RC) options. Minimal webcam support (UVC) is re-enabled in `10-base.config`.
-- `00-netfs-off.config`: disables network filesystems — CIFS/SMB, NFS, 9P, AFS, Ceph.
-- `00-pata-off.config`: disables legacy Parallel ATA (PATA) support and related host drivers.
-- `00-sata-off.config`: disables all `CONFIG_SATA_*` host/controller drivers; AHCI is re-enabled in `10-base.config`.
-- `00-alsa-pci-legacy-off.config`: disables legacy PCI ALSA drivers (non-HDA) such as EMU10K1, FM801, AC'97-era chipsets.
-- `00-joy-legacy-off.config`: disables legacy gameport-era joystick drivers (keeps USB-based xpad/iforce_usb, etc.).
-- `00-scsi-off.config`: disables SCSI low-level drivers (HBA-specific) while keeping SCSI core intact.
-- Intel Smart Connect, USB NET, NFC, 9P/RxRPC, and Ceph lib are disabled in `10-base.config`.
-
-### Optional Fragments (Opt-in)
-
-Currently none.
-
-These generated files complement `10-base.config`, which prioritizes a minimal, fast kernel by turning off extensive debug/tracing/testing options and choosing modern defaults like Zstd compression.
-
-Use `99-local.config` to selectively re-enable hardware or features required for your machine or workload. Start by copying the example:
-
-cp -n 99-local.config.example 99-local.config
-
-Then edit `99-local.config` to match your needs (e.g., specific GPU, WLAN vendors, higher CPU count, security modules, etc.).
-
-## Notes
-
-- On Gentoo, files placed in `/etc/kernel/config.d` are picked up by `sys-kernel/gentoo-kernel` on the next build/upgrade, influencing the final `.config`.
-- The generated files reflect the option families present in the selected source `.config` (enabled, modular, or already disabled are all normalized). If you change kernels, re-run `make` to refresh.
-- `install` depends on `all`, so `make install` will always generate before copying.
-- `install` writes a manifest to `/etc/kernel/config.d/.kernel-config.manifest` and removes files from previous installs that no longer exist in the repo (safe cleanup; it does not touch files it did not install).
-- `uninstall` reads the manifest and removes only the files previously installed by this repository, then deletes the manifest. It leaves `/etc/kernel/config.d` intact.
-- `prune` removes orphaned `00-*.config` files in the repo root that no longer have generators.
-- `clean` removes all `00-*.config` files.
-- `10-x86.config` is copied only when `uname -m` is `x86_64` or `i?86`.
-
-### Helper
-
-- `make help`: list available targets. `make all` runs `prune` automatically before generation.
-
-### Selecting the source `.config`
-
-- Default source: `/proc/config.gz`.
-- Use a plain-text file:
-
-  make KCONFIG_SRC=/path/to/.config
-
-- Use a compressed file (`.gz` is handled automatically):
-
-  make KCONFIG_SRC=/path/to/config.gz
+If a regression appears, list effective changes by inspecting `/etc/kernel/config.d/50-ursm-*.config`. Since this repository only disables heavy debug/instrumentation, unexpected behavioral changes should be rare. Temporarily remove the fragments with `bin/uninstall` to bisect.
 
 ## License
 
-MIT — see `LICENSE`.
+See `LICENSE`.
